@@ -1,0 +1,25 @@
+# Build caches
+**/.pio/
+**/.venv/
+*.zip
+
+# Nested local git dirs (monorepo publish uses this parent repo only)
+**/.git.local-backup/
+
+# Private / AI scaffolding
+.cursor/
+*.mdc
+PUBLISH_CHECKLIST.md
+
+# Upstream Seeed Indicator demos — not part of the Splitgrade controller
+darkroom-rp2040/examples/adc/
+darkroom-rp2040/examples/aht20/
+darkroom-rp2040/examples/buzzer/
+darkroom-rp2040/examples/co2/
+darkroom-rp2040/examples/co2_alarm/
+darkroom-rp2040/examples/indicator_rp2040/
+darkroom-rp2040/examples/rp2040_esp32_comm/
+darkroom-rp2040/examples/sd/
+darkroom-rp2040/examples/tvoc/
+darkroom-rp2040/LICENSE
+darkroom-rp2040/README.md
