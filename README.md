@@ -12,6 +12,14 @@ Companion / budget tier (phone over BLE):
 Shared enlarger-head firmware:
 [darkroom-enlarger-head](https://github.com/Draganito/darkroom-enlarger-head)
 
+## Start here (Debian)
+
+Do not install PlatformIO for a first flash. Grab the sender `.bin` and
+the RP2040 `.uf2` from
+**[Releases](https://github.com/Draganito/splitgrade-controller-sensecap/releases)**
+and follow **[FLASH.md](FLASH.md)** (`esptool` on the CH340 port, UF2 copy
+onto `RPI-RP2`).
+
 ## What this is
 
 Three PlatformIO projects in one repo (open **each subfolder** as the
@@ -37,36 +45,18 @@ re-copy into the head firmware.
 control and optional sensor-assisted starting exposures.
 
 **Includes:** ESP-NOW head control, hard/soft workflow, calibration UI,
-RP2040 sensor bridge sketch, German/English user docs under `docs/`.
+RP2040 sensor bridge, German/English user docs under `docs/`, prebuilt
+`.bin` / `.uf2` on GitHub Releases.
 
 **Not this repo:** Android BLE app, panel Gerbers, Play Store / SenseCAP
 factory firmware. Sensor assist is optional — the head works with manual
 times alone.
 
-## Requirements
-
-- [PlatformIO Core](https://platformio.org/)
-- SenseCAP Indicator D1 (sender); RP2040 co-processor for sensors
-- Enlarger head running [darkroom-enlarger-head](https://github.com/Draganito/darkroom-enlarger-head)
-- Optional second SenseCAP as `darkroom-receiver` for bench tests
-
-## Build / flash
-
-```bash
-cd darkroom-sender
-pio run
-pio run -t upload
-pio device monitor
-```
-
-Set `upload_port` / `monitor_port` in each `platformio.ini` to your serial
-device. The RP2040 bridge uses a **UF2** flash flow (BOOTSEL) — see
-`docs/TECHNICAL_CONCEPT.md` § Build & flash notes.
-
 ## Docs
 
 | File | Contents |
 |------|----------|
+| `FLASH.md` | Beginner flash on Debian (no PlatformIO) |
 | `docs/TECHNICAL_CONCEPT.md` | Architecture, protocol, calibration math |
 | `docs/USER_GUIDE.md` / `docs/BEDIENUNGSANLEITUNG_DE.md` | Operator guide EN / DE |
 | `docs/HARDWARE_BRINGUP_NOTES.md` | Bring-up notes |
