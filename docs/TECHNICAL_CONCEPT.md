@@ -239,7 +239,7 @@ Standard `pio run -t upload` from each project folder, over `/dev/ttyUSB0` (see 
 
 ## 12) Field-configurable LED panel geometry (`CMD_SET_LED_CONFIG`, hidden `UI_LEDCFG` screen)
 
-Since this project is open-source, someone else building their own real LED head (see `darkroom-enlarger-head`) may wire up a SK6812RGBW-NW panel with a different pixel count than this project's 169-pixel reference panel, or use a different data GPIO. Rather than hard-coding that, it is configurable at runtime — no re-flash needed.
+Since this project is open-source, someone else building their own real LED head (see `darkroom-enlarger-head`) may wire up a SK6812RGBW panel with a different pixel count than the 109-pixel reference panel (MILUKA Aristo D2, in `kicad-mcp/contrib`), or use a different data GPIO. Rather than hard-coding that, it is configurable at runtime — no re-flash needed.
 
 - **Access**: a 3-second hold on **`MEAS LIT`** while idle on `UI_MAIN` opens the hidden `UI_LEDCFG` screen (exactly the same hold-candidate pattern already used for `MEAS BLK` → `UI_CAL` and `EXPOSURE` → `UI_XOVER`, see §4). A short tap on `MEAS LIT` still does its normal job (metering green light, §5.3) — unchanged.
 - **Two settings only**, deliberately minimal:

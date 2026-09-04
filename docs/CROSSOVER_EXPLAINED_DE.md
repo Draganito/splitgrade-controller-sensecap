@@ -1,3 +1,5 @@
+# Das Belichtungsmodell, ganz ohne Formeln
+
 In der Dunkelkammer arbeiten wir mit den Augen, dem Gefühl für Licht und der Reaktion des Fotopapiers – nicht mit Algebra. Deshalb lass uns den gesamten Vorgang ganz intuitiv und **völlig ohne mathematische Formeln** betrachten.
 
 *Hinweis: Dieses Dokument beschreibt das aktuelle Belichtungsmodell des Controllers. Es ersetzt eine frühere Version, die mit einem einzigen "Crossover"-Korrekturfaktor arbeitete. Das neue Modell braucht diesen Kompromiss nicht mehr, weil es Blau und Grün von Anfang an getrennt behandelt.*
@@ -31,7 +33,7 @@ Auf dem versteckten Kalibrier-Bildschirm (durch 3 Sekunden Halten von `MEAS BLK`
 
 #### 3. Den echten Testabzug machen
 
-Jetzt belichtest du an deinem Vergrößerer einen echten Probestreifen durch den Stufenkeil, mit einer festen, selbst gewählten Testzeit (Standard 10 Sekunden, änderbar über `TIME +/-`). Das macht der Controller heute noch nicht selbst, weil noch kein echter Leuchtkopf angeschlossen ist – du übernimmst diesen einen Handgriff.
+Jetzt belichtest du an deinem Vergrößerer einen echten Probestreifen durch den Stufenkeil, mit einer festen, selbst gewählten Testzeit (Standard 10 Sekunden, änderbar über `TIME +/-`). Diese eine Testbelichtung startest du noch von Hand am Vergrößerer – die Automatisierung dieses Schritts steht auf der Roadmap, alles andere übernimmt der Controller bereits.
 
 #### 4. Entwickeln und die richtige Stufe suchen
 

@@ -11,7 +11,9 @@ Der Controller nimmt dir die Rechnerei ab und gibt dir schnell einen guten Start
 Zwei Geräte arbeiten dabei zusammen:
 
 - **Der Controller in deiner Hand** — das Touchscreen-Gerät, das du bedienst.
-- **Der Vergrößererkopf** — aktuell ein Testgerät, das Blau/Grün/Weiß simuliert; später steuert er direkt deinen echten Vergrößerer.
+- **Der Vergrößererkopf** — die LED-Lampe in deinem Vergrößerer, mit der
+  [darkroom-enlarger-head](https://github.com/Draganito/darkroom-enlarger-head)-Firmware
+  (oder ein zweiter SenseCAP als Testgerät auf der Werkbank).
 
 Beide reden drahtlos miteinander. In der Dunkelkammer musst du nichts verkabeln.
 
@@ -76,7 +78,7 @@ Beide Messungen sind immer absolute, frische Werte — es gibt keinen "Referenzw
 
 - **EXPOSURE** ist dein universeller Nothalt: läuft gerade eine Belichtung oder das Fokuslicht, bricht ein Tap auf `EXPOSURE` sofort und ohne Verzögerung ab — egal was sonst gerade passiert.
 - Tippst du versehentlich **FOCUS** während eine Belichtung läuft, bricht der Controller die Belichtung ab, statt einfach ins Fokuslicht zu springen. Ein zweiter Tap auf `FOCUS` schaltet danach wirklich das Fokuslicht ein.
-- `MEAS BLK`/`MEAS LIT` und beide versteckten Menüs sind gesperrt, solange eine Belichtung oder das Fokuslicht läuft — so kann keine verunreinigte Messung mitten im Druck passieren.
+- `MEAS BLK`/`MEAS LIT` und alle versteckten Menüs sind gesperrt, solange eine Belichtung oder das Fokuslicht läuft — so kann keine verunreinigte Messung mitten im Druck passieren.
 
 ---
 
@@ -86,9 +88,9 @@ Jeder Tastendruck gibt einen kurzen, leisen Klick — sofortige Bestätigung, au
 
 ---
 
-## 8) Die zwei versteckten Menüs
+## 8) Die drei versteckten Menüs
 
-Beide Menüs sind nur erreichbar, wenn gerade **nichts läuft** (Status `IDLE`) — sie können also nie versehentlich eine laufende Belichtung stören.
+Alle drei Menüs sind nur erreichbar, wenn gerade **nichts läuft** (Status `IDLE`) — sie können also nie versehentlich eine laufende Belichtung stören.
 
 ### 8.1 Kalibriermenü
 
@@ -104,6 +106,17 @@ Ein kleiner, optionaler Regler für eine ganz konkrete, in der Fachliteratur dok
 
 **So findest du den richtigen Wert für dein Papier:** Ein Negativ messen und drucken, das eine eher lange Hart-Belichtung braucht — einmal mit `+0.00`. Wirken die Lichter dunkler/flauer als erwartet, den Test mit `+0.10`, dann `+0.15` usw. wiederholen, bis die Lichter wieder passen. Einmal gefunden, bleibt der Wert für diese Papier-/Entwickler-Kombination stabil und reproduzierbar — du musst dieses Menü danach nicht mehr anfassen.
 
+### 8.3 LED-Panel-Menü ("LEDCFG") — einmalige Einrichtung
+
+Hat dein Vergrößererkopf ein anderes LED-Panel als das Referenzpanel (andere Pixelzahl oder die Datenleitung an einem anderen GPIO), stellst du das hier ein — ganz ohne neu zu flashen.
+
+- **MEAS LIT** ca. 3 Sekunden halten, während nichts läuft → öffnet `LEDCFG`. Ein kurzer Tap auf `MEAS LIT` misst weiterhin ganz normal das grüne Licht.
+- Mit **+ / −** die **Pixelzahl** und den **Daten-GPIO** passend zu deinem Panel einstellen (Referenzwerte: siehe [FLASH.md](https://github.com/Draganito/darkroom-enlarger-head/blob/main/FLASH.md) §4 des Kopfs).
+- **SAVE** sendet die Einstellungen an den Kopf — der merkt sie sich selbst, auch über Stromausfälle hinweg. Das bloße Öffnen des Menüs sendet nichts; nur `SAVE` überträgt. Ein `SAVE` ohne Änderung eignet sich auch, um einen frisch geflashten Kopf neu zu synchronisieren.
+- **BACK** zum Zurückkehren.
+
+Das machst du normalerweise genau einmal, direkt nach dem Flashen — und danach nie wieder.
+
 ---
 
 ## 9) Schnellreferenz-Karte
@@ -118,6 +131,7 @@ Ein kleiner, optionaler Regler für eine ganz konkrete, in der Fachliteratur dok
 | Druck starten/stoppen | `EXPOSURE` (kurzer Tap) |
 | Sofort alles abbrechen | `EXPOSURE` |
 | Cross-Faktor einstellen (Lichter wirken nach langer Hart-Zeit zu dunkel) | `EXPOSURE` ~3 s halten (im Leerlauf) → `+`/`-` → `BACK` |
+| LED-Panel einstellen (einmalig nach dem Flashen) | `MEAS LIT` ~3 s halten (im Leerlauf) → Werte setzen → `SAVE` |
 
 ---
 

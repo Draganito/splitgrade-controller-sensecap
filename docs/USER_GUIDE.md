@@ -11,7 +11,9 @@ This controller helps you get to a good first exposure quickly, then gets out of
 Two devices work together:
 
 - **The controller in your hand** (the touchscreen unit you operate).
-- **The enlarger head** (currently a second test unit; later this will control your real enlarger lamp wirelessly).
+- **The enlarger head** (the LED lamp in your enlarger, running the
+  [darkroom-enlarger-head](https://github.com/Draganito/darkroom-enlarger-head)
+  firmware — or a second SenseCAP as a bench stand-in while testing).
 
 They talk to each other wirelessly. You never need to plug anything in in the darkroom.
 
@@ -121,7 +123,31 @@ How to find the right value for your paper: meter and print a negative that need
 
 ---
 
-## 12) Quick reference card
+## 12) The hidden LED-panel menu (one-time setup)
+
+If your enlarger head uses a different LED panel than the reference one
+(different pixel count, or the data wire on another GPIO), you can tell it
+so from here — no re-flashing needed.
+
+- Hold **MEAS LIT** for about 3 seconds **while idle** to open the hidden
+  `LEDCFG` screen. A quick tap on `MEAS LIT` still meters green light as
+  usual.
+- Use **+ / -** to set the **pixel count** and the **data GPIO** to match
+  your panel (see the head's
+  [FLASH.md](https://github.com/Draganito/darkroom-enlarger-head/blob/main/FLASH.md)
+  §4 for the reference values).
+- Tap **SAVE** to send the settings to the head. The head stores them
+  itself and remembers them across power cycles. Opening the menu alone
+  sends nothing — only `SAVE` transmits, so you can peek at the current
+  values safely. `SAVE` with unchanged values doubles as a "resync" for a
+  freshly flashed head.
+- Tap **BACK** to return to the main screen.
+
+You normally touch this once, right after flashing, and never again.
+
+---
+
+## 13) Quick reference card
 
 | You want to... | Do this |
 |---|---|
@@ -133,9 +159,10 @@ How to find the right value for your paper: meter and print a negative that need
 | Start/stop a print | `EXPOSURE` (quick tap, while idle/running) |
 | Abort anything immediately | `EXPOSURE` |
 | Tune the optional cross-factor (highlights look muddy after a long hard exposure) | Hold `EXPOSURE` ~3s while idle → `+` (positive values) → `BACK` |
+| Set LED count / GPIO for your panel (once after flashing) | Hold `MEAS LIT` ~3s while idle → set values → `SAVE` |
 
 ---
 
-## 13) What this controller is *not*
+## 14) What this controller is *not*
 
 It does not make artistic decisions for you. It gives you a fast, repeatable, technically consistent starting point — the final look of the print is always yours to shape by eye, exactly as in traditional darkroom printing.

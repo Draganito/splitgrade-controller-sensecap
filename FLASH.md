@@ -66,8 +66,8 @@ seconds on the main screen, then **SAVE**):
 
 | Panel | LEDs | Data GPIO |
 | --- | --- | --- |
-| 4″×5″ (`darkroom-led-panel-4x5`) | 99 | GPIO **5** (XIAO pin **D4**) |
-| MILUKA Aristo D2 (109 SK6812) | 109 | GPIO **5** (XIAO pin **D4**) |
+| [MILUKA Aristo D2](https://github.com/Draganito/kicad-mcp/tree/main/contrib/aristo-d2-led-panel) (109 SK6812) | 109 | GPIO **5** (XIAO pin **D4**) |
+| Your own SK6812RGBW panel | as wired | as wired |
 
 GPIO is whichever XIAO pin you wired to the panel **DATA** pad.
 
