@@ -40,7 +40,7 @@ Das machst du **nur einmal pro Papier-/Entwickler-Kombination** — danach musst
 
 1. Stouffer-Stufenkeil in die Bildbühne einlegen, so wie sonst ein Negativ.
 2. **MEAS BLK** ca. 3 Sekunden gedrückt halten → das versteckte Kalibriermenü öffnet sich.
-3. Für die **blaue** Seite: **READ REF** antippen — der Controller merkt sich die aktuelle Lichtstärke.
+3. Für die **blaue** Seite: **READ REF** antippen — der Controller macht die Messung komplett selbst: er schaltet den Vergrößererkopf auf Blau, lässt die LEDs 3 Sekunden warmlaufen, dunkelt den eigenen Bildschirm ab und mittelt 20 Sensormessungen (insgesamt ca. 7–8 Sekunden), dann geht das Licht wieder aus.
 4. An deinem Vergrößerer einen echten Probestreifen durch den Stufenkeil belichten, mit der angezeigten **TEST TIME** (bei Bedarf mit `TIME +/-` anpassen).
 5. Entwickeln. Die Stufe suchen, an der dein Zielton zum ersten Mal erreicht ist (für Blau z. B. das erste satte Schwarz) und diese Stufennummer mit `STEP +/-` einstellen.
 6. **SAVE** auf der blauen Seite antippen — der Zielwert ist jetzt gespeichert.
@@ -54,7 +54,7 @@ Das machst du **nur einmal pro Papier-/Entwickler-Kombination** — danach musst
 1. Negativ einlegen, mit **FOCUS** scharfstellen und rahmen.
 2. Auf dem **klaren Filmrand zwischen zwei Bildern messen**, nicht auf dem Motiv selbst — das gibt jedes Mal eine stabile, wiederholbare Messung.
 3. **MEAS BLK** antippen (kurzer Tap).
-   - Der Bildschirm wird kurz dunkel — Absicht, damit das Panel-Licht die Sensormessung nicht stört.
+   - Der Kopf schaltet auf Blau und läuft 3 Sekunden warm, dann wird der Bildschirm für einige Sekunden dunkel, während 20 Sensormessungen gemittelt werden — Absicht, damit das Panel-Licht die Messung nicht stört. Insgesamt dauert die Messung ca. 7–8 Sekunden.
    - Der Controller misst das blaue Licht und berechnet daraus eine frische Hart-Zeit.
 4. **MEAS LIT** genauso antippen — misst Grün, berechnet die Weich-Zeit.
 5. **EXPOSURE** antippen → dein erster Abzug wird gemacht.

@@ -40,8 +40,8 @@ You calibrate blue and green separately, using the same steps for each color. Th
 
 1. Insert your Stouffer stepwedge in the negative carrier.
 2. Hold **MEAS BLK** for about 3 seconds to open the hidden calibration screen.
-3. For the **blue** side: tap **READ REF** to capture the current blue light intensity.
-4. At your enlarger, manually expose a real test print through the stepwedge for the shown **TEST TIME** (adjust with `TIME +/-` if you want a different duration first).
+3. For the **blue** side: tap **READ REF**. The controller now does the whole measurement by itself: it switches the enlarger head to blue, waits 3 seconds for the LEDs to warm up, darkens its own screen and takes 20 averaged sensor readings (about 7–8 seconds in total), then turns the light back off.
+4. At your enlarger, expose a real test print through the stepwedge for the shown **TEST TIME** (adjust with `TIME +/-` if you want a different duration first).
 5. Develop the print. Find the step where the tone first reaches your target (e.g. first solid black for blue) and dial that step number into **STEP +/-** for the blue side.
 6. Tap **SAVE** on the blue side. The target dose is now stored.
 7. Repeat steps 3–6 for the **green** side (use a lighter reference step, e.g. first visible grey, since green sets your highlight/tone response).
@@ -56,7 +56,7 @@ You don't need to redo this for every print — only when you change paper, deve
 1. Put your negative in the carrier and focus/frame the image (use **FOCUS** as needed).
 2. Place your easel. **Measure on the clear film strip between two frames**, not on the image itself — this gives a stable, repeatable reading every time.
 3. Tap **MEAS BLK** (a quick, single tap).
-   - The screen briefly goes dark for about a second — this is intentional, so the panel's own light doesn't disturb the measurement.
+   - The head switches to blue and warms up for 3 seconds, then the screen goes dark for a few seconds while 20 averaged sensor readings are taken — this is intentional, so the panel's own light doesn't disturb the measurement. The whole measurement takes about 7–8 seconds.
    - The controller measures the blue light and computes a fresh `HARD` time from your calibrated blue dose.
 4. Tap **MEAS LIT** the same way — this measures the green light and computes a fresh `SOFT` time from your calibrated green dose.
 5. Tap **EXPOSURE** to make your first print.

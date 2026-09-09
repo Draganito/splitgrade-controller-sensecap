@@ -151,7 +151,18 @@ static constexpr uint32_t kHoldRepeatSlowMs = 140;
 static constexpr uint32_t kHoldRepeatFastMs = 70;
 static constexpr uint32_t kHoldRepeatTurboMs = 35;
 static constexpr uint16_t kTapBeepMs = 12; // fixed low click feedback
-static constexpr uint32_t kMeterSettleMs = 150; // let color light settle before reading
+// LED warm-up after switching a meter color on, before any sample is taken.
+// SK6812 output drifts noticeably in the first seconds after turn-on; 3 s
+// gets past the steep part of that curve for both calibration (READ REF)
+// and daily metering (MEAS BLK/MEAS LIT), so both see the same light.
+static constexpr uint32_t kMeterWarmupMs = 3000;
+// Multi-sample averaging: 20 samples, trimmed mean (min and max dropped).
+// The TSL2591 integrates 100 ms per sample on the bridge, so a full run is
+// ~2.5 s -- cheap insurance for a value that ends up persisted in flash.
+static constexpr uint8_t kMeterSamples = 20;
+static constexpr uint8_t kMeterSamplesMin = 12;      // accept run despite a few dropped samples
+static constexpr uint32_t kMeterSampleTimeoutMs = 1400; // per-sample poll timeout
+static constexpr uint32_t kMeterRunBudgetMs = 8000;  // hard cap on one averaging run
 
 enum MeterSensorType : uint8_t { SENSOR_NONE = 0, SENSOR_TSL2591, SENSOR_AS7343 };
 MeterSensorType meterSensor = SENSOR_NONE;
@@ -488,19 +499,14 @@ static bool pointInMainExposureButton(int16_t x, int16_t y) {
   return x >= bx && x <= (bx + kMainColW) && y >= by && y <= (by + kMainBtnH);
 }
 
-static bool fetchFreshSensorMetric(float &metricOut) {
-  if (!rpLinkReady) {
-    return false;
-  }
-  const uint8_t restoreDuty = backlightDuty;
-  // Prevent panel light from disturbing optical sensor reads.
-  setBacklight(0);
-  delay(1000);
+// One sensor sample. Assumes the backlight is already off (see
+// fetchFreshSensorMetric()); sends SAMPLE_NOW and polls for a fresh value.
+static bool fetchSensorSampleRaw(float &metricOut) {
   const uint32_t startedAt = millis();
   meterLastReadOk = false;
   rp2040SendCommand(PKT_TYPE_CMD_EXT_SAMPLE_NOW, 0);
 
-  while ((millis() - startedAt) < 1400) {
+  while ((millis() - startedAt) < kMeterSampleTimeoutMs) {
     updateRp2040Link();
     // TSL2591 (with the bridge's auto-gain) is the sensor we actually rely on
     // for metering -- it needs no spectral calibration for the ratio-based
@@ -512,7 +518,6 @@ static bool fetchFreshSensorMetric(float &metricOut) {
     if (meterLastLuxMs >= startedAt && meterLastLux > 0.01f) {
       meterSensor = SENSOR_TSL2591;
       metricOut = meterLastLux;
-      setBacklight(restoreDuty);
       return true;
     }
     if (meterLastBlueMs >= startedAt && meterLastGreenMs >= startedAt) {
@@ -520,25 +525,75 @@ static bool fetchFreshSensorMetric(float &metricOut) {
       if (mix > 0.01f) {
         meterSensor = SENSOR_AS7343;
         metricOut = mix;
-        setBacklight(restoreDuty);
         return true;
       }
     }
     delay(8);
   }
-  setBacklight(restoreDuty);
   return false;
 }
 
+// Averaged measurement: backlight off, up to kMeterSamples individual
+// samples (bounded by kMeterRunBudgetMs), trimmed mean (min and max
+// dropped). Fails fast if the very first sample times out (dead link /
+// missing sensor) so the screen doesn't stay dark for the whole budget.
+// Backlight is restored on every exit path.
+static bool fetchFreshSensorMetric(float &metricOut) {
+  if (!rpLinkReady) {
+    return false;
+  }
+  const uint8_t restoreDuty = backlightDuty;
+  // Prevent panel light from disturbing optical sensor reads.
+  setBacklight(0);
+  delay(1000);
+
+  float samples[kMeterSamples];
+  uint8_t got = 0;
+  const uint32_t runStartedAt = millis();
+  for (uint8_t i = 0; i < kMeterSamples; ++i) {
+    if ((millis() - runStartedAt) >= kMeterRunBudgetMs) {
+      break;
+    }
+    float v = 0.0f;
+    if (fetchSensorSampleRaw(v)) {
+      samples[got++] = v;
+    } else if (got == 0) {
+      break;
+    }
+  }
+  setBacklight(restoreDuty);
+
+  if (got < kMeterSamplesMin) {
+    return false;
+  }
+  float sum = 0.0f;
+  float mn = samples[0];
+  float mx = samples[0];
+  for (uint8_t i = 0; i < got; ++i) {
+    sum += samples[i];
+    if (samples[i] < mn) {
+      mn = samples[i];
+    }
+    if (samples[i] > mx) {
+      mx = samples[i];
+    }
+  }
+  metricOut = (sum - mn - mx) / (float)(got - 2);
+  return metricOut > 0.01f;
+}
+
 // Turns on a single color light on the (simulated or real) enlarger head,
-// waits briefly for it to settle, takes one fresh sensor reading, then turns
-// the light back off. Used for the two daily MEAS BLK/MEAS LIT measurements.
+// waits kMeterWarmupMs for the LEDs to warm up, takes an averaged sensor
+// reading (display dark during the samples), then turns the light back off.
+// Used by the daily MEAS BLK/MEAS LIT measurements *and* by the CAL screen's
+// READ REF -- both must see the same warmed-up light through the same
+// averaging, otherwise the noise doesn't cancel in dose / intensity.
 // The TSL2591 is a broadband sensor, so this only produces a valid color-
 // specific reading if no other light is active at the same time -- on real
 // hardware the receiver enforces exactly one color at a time.
 static bool meterAtColor(Command meterOnCmd, float &metricOut) {
   sendCommandRetry(meterOnCmd);
-  delay(kMeterSettleMs);
+  delay(kMeterWarmupMs);
   const bool ok = fetchFreshSensorMetric(metricOut);
   sendCommandRetry(CMD_STOP);
   return ok;
@@ -989,8 +1044,11 @@ static void drawCalScreen(bool fullRedraw) {
   snprintf(buf, sizeof(buf), "%-9s", raw);
   printValue(kCalCardY + 8, buf);
 
+  // Three decimals: green target doses are legitimately tiny (a threshold
+  // dose of ~0.03 lux*s is physically plausible), so one decimal would
+  // display a real, saved value as "0.0" and look like a failed SAVE.
   if (calRefIntensityBlue > 0.01f) {
-    snprintf(raw, sizeof(raw), "%.2f", calRefIntensityBlue);
+    snprintf(raw, sizeof(raw), "%.3f", calRefIntensityBlue);
   } else {
     snprintf(raw, sizeof(raw), "NOT READ");
   }
@@ -998,7 +1056,7 @@ static void drawCalScreen(bool fullRedraw) {
   printValue(kCalCardY + 32, buf);
 
   if (calDoseBlue > 0.0f) {
-    snprintf(raw, sizeof(raw), "%.1f", calDoseBlue);
+    snprintf(raw, sizeof(raw), "%.3f", calDoseBlue);
   } else {
     snprintf(raw, sizeof(raw), "NOT SET");
   }
@@ -1006,7 +1064,7 @@ static void drawCalScreen(bool fullRedraw) {
   printValue(kCalCardY + 56, buf);
 
   if (calRefIntensityGreen > 0.01f) {
-    snprintf(raw, sizeof(raw), "%.2f", calRefIntensityGreen);
+    snprintf(raw, sizeof(raw), "%.3f", calRefIntensityGreen);
   } else {
     snprintf(raw, sizeof(raw), "NOT READ");
   }
@@ -1014,7 +1072,7 @@ static void drawCalScreen(bool fullRedraw) {
   printValue(kCalCardY + 84, buf);
 
   if (calDoseGreen > 0.0f) {
-    snprintf(raw, sizeof(raw), "%.1f", calDoseGreen);
+    snprintf(raw, sizeof(raw), "%.3f", calDoseGreen);
   } else {
     snprintf(raw, sizeof(raw), "NOT SET");
   }
@@ -1476,8 +1534,11 @@ static void handleCalTouch(int16_t x, int16_t y) {
     startHoldRepeat(HOLD_CAL_STEP_GREEN_PLUS, stepGreenPlusX, kCalRow1Y, kCalStepBtnW, kCalRowH);
   } else if (hit(x, y, {kCalLeftX, kCalRow2Y, kCalHalfW, kCalRowH, "", 0, 0, true})) {
     playTapBeep();
+    // READ REF drives the head itself: blue light on, warm-up, averaged
+    // read, light off -- same path as the daily MEAS BLK, so calibration
+    // and daily metering see identical conditions.
     float metric = 0.0f;
-    const bool ok = fetchFreshSensorMetric(metric);
+    const bool ok = meterAtColor(CMD_METER_BLUE_ON, metric);
     if (ok) {
       calRefIntensityBlue = metric;
     } else {
@@ -1486,7 +1547,7 @@ static void handleCalTouch(int16_t x, int16_t y) {
   } else if (hit(x, y, {kCalRightX, kCalRow2Y, kCalHalfW, kCalRowH, "", 0, 0, true})) {
     playTapBeep();
     float metric = 0.0f;
-    const bool ok = fetchFreshSensorMetric(metric);
+    const bool ok = meterAtColor(CMD_METER_GREEN_ON, metric);
     if (ok) {
       calRefIntensityGreen = metric;
     } else {
