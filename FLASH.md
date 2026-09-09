@@ -8,8 +8,8 @@ The D1 has **two USB-C ports and two chips**. Flash both.
 
 | Chip | Release file | How you know the port |
 | --- | --- | --- |
-| ESP32-S3 (touchscreen / ESP-NOW) | `splitgrade-sensecap-sender-0.2.0.bin` | `USB-SERIAL CH340` → usually `/dev/ttyUSB0` |
-| RP2040 (sensor bridge, optional) | `splitgrade-sensecap-rp2040-0.2.0.uf2` | `USB Serial Device` → `/dev/ttyACM0`, or a disk named `RPI-RP2` |
+| ESP32-S3 (touchscreen / ESP-NOW) | `splitgrade-sensecap-sender-0.2.1.bin` | `USB-SERIAL CH340` → usually `/dev/ttyUSB0` |
+| RP2040 (sensor bridge, optional) | `splitgrade-sensecap-rp2040-0.2.1.uf2` | `USB Serial Device` → `/dev/ttyACM0`, or a disk named `RPI-RP2` |
 
 The real LED head is a separate board:
 [darkroom-enlarger-head](https://github.com/Draganito/darkroom-enlarger-head/releases).
@@ -33,7 +33,7 @@ Plug USB-C into the **CH340** port (Device Manager / `dmesg` shows
 
 ```bash
 esptool --chip esp32s3 --port /dev/ttyUSB0 --baud 921600 write_flash 0x0 \
-  splitgrade-sensecap-sender-0.2.0.bin
+  splitgrade-sensecap-sender-0.2.1.bin
 ```
 
 If the command is `esptool.py` on your machine, use that name instead.
@@ -51,7 +51,7 @@ address `0x0`, same `.bin`.
 4. Copy the UF2 onto it:
 
    ```bash
-   cp splitgrade-sensecap-rp2040-0.2.0.uf2 /media/$USER/RPI-RP2/
+   cp splitgrade-sensecap-rp2040-0.2.1.uf2 /media/$USER/RPI-RP2/
    ```
 
 The disk unmounts by itself after 1–2 seconds. That is success.
